@@ -38,7 +38,7 @@ public class Fluxjava8Application {
 
         Flux<java.lang.Integer> sampleFlux = Flux.just(1, 9, 4, 7, 6, 2, 2, 7, 3, 4, 8).skip(startId);
 
-        final Flux<Long> interval = Flux.interval(Duration.ofSeconds(10));
+        final Flux<Long> interval = Flux.interval(Duration.ofSeconds(3));
 
         return interval.zipWith(sampleFlux).map(data ->
                 ServerSentEvent.<Integer>builder()
