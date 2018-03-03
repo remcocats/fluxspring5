@@ -17,6 +17,7 @@ import java.lang.NumberFormatException;
 @RestController
 public class Fluxjava8Application {
 
+    private static int call = 0;
     public static void main(String[] args) {
 		SpringApplication.run(Fluxjava8Application.class, args);
 	}
@@ -30,22 +31,18 @@ public class Fluxjava8Application {
      * @return
      */
 	@GetMapping(value = "/api", produces = "text/event-stream")
-    public Flux<ServerSentEvent<Integer>> rootGet(@RequestHeader(value="Last-Event-ID", required=false) String lastEventId) {
-	    int startId = 0;
-	    try {
-            startId = Integer.parseInt(lastEventId);
-        } catch (NumberFormatException e) {
-	        // Do nothing
-        }
-        System.out.println("Skipping: " + startId);
+    public Flux<ServerSentEvent<Integer>> rootGet(@RequestHeader(value="Last-Event-ID", required=false) final Integer lastEventId) {
+	    final int startId = (lastEventId != null ? lastEventId + 1 : 0);
+
+        System.out.println("Call: " + call++ + " Skipping: " + startId);
 
         Flux<java.lang.Integer> sampleFlux = Flux.just(1, 9, 4, 7, 6, 2, 2, 7, 3, 4, 8).skip(startId);
 
-        final Flux<Long> interval = Flux.interval(Duration.ofSeconds(1));
+        final Flux<Long> interval = Flux.interval(Duration.ofSeconds(10));
 
         return interval.zipWith(sampleFlux).map(data ->
                 ServerSentEvent.<Integer>builder()
-                        .id(Long.toString(data.getT1()))
+                        .id(Long.toString(data.getT1() + startId))
                         .data(data.getT2())
                         .build());
     }
