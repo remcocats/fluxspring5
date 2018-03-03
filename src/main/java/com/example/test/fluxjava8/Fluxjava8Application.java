@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.util.function.Tuple2;
+import org.springframework.http.codec.ServerSentEvent;
 
 import java.time.Duration;
 
@@ -27,34 +27,15 @@ public class Fluxjava8Application {
      * @return
      */
 	@GetMapping(value = "/api", produces = "text/event-stream")
-    public Flux<Num> rootGet() {
+    public Flux<ServerSentEvent<Integer>> rootGet() {
         Flux<java.lang.Integer> sampleFlux = Flux.just(1, 9, 4, 7, 6, 2, 2, 7, 3, 4, 8);
 
         final Flux<Long> interval = Flux.interval(Duration.ofSeconds(1));
 
-        return interval.zipWith(sampleFlux).map(Tuple2::getT2).map(Num::of);
-    }
-
-    public static class Num {
-        private String text = "Babbel";
-        private Integer val;
-
-        public static Num of(Integer n) {
-            final Num num = new Num();
-            num.setVal(n);
-            return num;
-        }
-
-        public void setVal(Integer val) {
-            this.val = val;
-        }
-
-        public Integer getVal() {
-            return val;
-        }
-
-        public String getText() {
-            return text;
-        }
+        return interval.zipWith(sampleFlux).map(data ->
+                ServerSentEvent.<Integer>builder()
+                        .id(Long.toString(data.getT1()))
+                        .data(data.getT2())
+                        .build());
     }
 }
