@@ -1,6 +1,6 @@
 package com.example.test.fluxjava8;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.util.function.Tuple2;
 

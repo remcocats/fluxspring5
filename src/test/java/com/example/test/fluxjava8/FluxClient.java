@@ -1,7 +1,8 @@
 package com.example.test.fluxjava8;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 
@@ -10,14 +11,14 @@ public class FluxClient {
     @Test
     public void testClient() throws InterruptedException {
 
-        final WebClient producerClient = WebClient.create("http://localhost:8080/");
+        final WebClient producerClient = WebClient.create("http://localhost:8080/api");
 
-        Flux<Fluxjava8Application.Num> entries = producerClient.get()
-                .accept(MediaType.APPLICATION_STREAM_JSON)
+        Flux<String> entries = producerClient.get()
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
-                .flatMapMany(clientResponse -> clientResponse.bodyToFlux(Fluxjava8Application.Num.class));
+                .flatMapMany(clientResponse -> clientResponse.bodyToFlux(String.class));
 
-        entries.subscribe(n -> System.out.println(n.getVal()));
+        entries.subscribe(evt -> System.out.println(evt));
 
         Thread.sleep(20500L);
     }
