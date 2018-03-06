@@ -17,7 +17,7 @@ public class FluxClient {
                 .exchange()
                 .flatMapMany(clientResponse -> clientResponse.bodyToFlux(String.class));
 
-        entries.subscribe(evt -> System.out.println(evt));
+        entries.subscribe(evt -> System.out.println("data: " + evt));
 
         Thread.sleep(20500L);
     }
